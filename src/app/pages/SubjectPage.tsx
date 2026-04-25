@@ -255,13 +255,14 @@ export function SubjectPage() {
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto pb-32">
+    <div className="max-w-7xl mx-auto pb-32">
       <div className="mb-6 flex items-center justify-between">
-        <h1>{subject._meta.title}</h1>
+        <h1 className="truncate mr-2">{subject._meta.title}</h1>
         <Button
           onClick={() => setZenMode(true)}
           variant="outline"
           size="sm"
+          className="shrink-0"
         >
           <Eye className="size-4 mr-2" />
           Zen Mode
@@ -269,7 +270,7 @@ export function SubjectPage() {
       </div>
 
       <Tabs defaultValue="notes" value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList>
+        <TabsList className="w-full justify-start overflow-x-auto">
           <TabsTrigger value="notes">Notes</TabsTrigger>
           <TabsTrigger value="decks">Anki Deck</TabsTrigger>
         </TabsList>
@@ -292,7 +293,7 @@ export function SubjectPage() {
             ) : (
               <>
                 <div className="max-w-2xl mx-auto space-y-4">
-                  <div className="flex justify-between items-center text-sm">
+                  <div className="flex flex-wrap justify-between items-center text-sm gap-2">
                     <div className="flex gap-4">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-primary" />
@@ -333,7 +334,7 @@ export function SubjectPage() {
         </TabsContent>
       </Tabs>
 
-      <div className={`fixed bottom-8 z-50 transition-all duration-300 ${sidebarOpen ? 'right-8' : 'left-1/2 -translate-x-1/2'}`}>
+      <div className={`fixed bottom-safe-bottom z-50 transition-all duration-300 mb-8 ${sidebarOpen ? 'right-8' : 'left-1/2 -translate-x-1/2'}`}>
         <PomodoroTimer onTimeUpdate={handleTimeUpdate} />
       </div>
     </div>

@@ -112,8 +112,8 @@ export function WelcomePage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-8">
-      <Card className="max-w-4xl w-full p-8">
+    <div className="flex items-center justify-center min-h-full">
+      <Card className="max-w-4xl w-full p-4 md:p-8">
         <div className="space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-4xl">Welcome to DeckMe!</h1>
@@ -123,7 +123,7 @@ export function WelcomePage() {
           </div>
 
           <div className="relative">
-            <pre className="bg-muted p-6 rounded-lg overflow-auto max-h-96 text-sm font-mono">
+            <pre className="bg-muted p-6 rounded-lg overflow-auto max-h-48 md:max-h-96 text-sm font-mono">
               {AI_PROMPT}
             </pre>
             <Button

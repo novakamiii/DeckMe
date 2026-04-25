@@ -78,7 +78,7 @@ export function SettingsPage() {
   const userSubjects = getUserUploadedSubjects();
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <h1 className="mb-6">Settings</h1>
 
       <div className="space-y-6">
@@ -123,10 +123,10 @@ export function SettingsPage() {
               <JsonUploader />
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Dialog open={isSubjectModalOpen} onOpenChange={setIsSubjectModalOpen}>
                 <DialogTrigger asChild>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="w-full sm:flex-1">
                     Subject Management
                   </Button>
                 </DialogTrigger>
@@ -167,7 +167,7 @@ export function SettingsPage() {
                 </DialogContent>
               </Dialog>
 
-              <Button variant="outline" onClick={() => setClearStatsConfirmOpen(true)} className="flex-1">
+              <Button variant="outline" onClick={() => setClearStatsConfirmOpen(true)} className="w-full sm:flex-1">
                 Clear Statistics
               </Button>
             </div>

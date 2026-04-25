@@ -96,7 +96,7 @@ export function StatsPage() {
   const hasStatsData = subjectsWithStats.length > 0;
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <h1 className="mb-6">Statistics</h1>
 
       <div className="space-y-6">
