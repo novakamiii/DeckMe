@@ -94,9 +94,3 @@ Select your subject from the sidebar and choose between **Notes View** for revie
 ## 📄 License
 
 Distributed under the Apache License 2.0. See `LICENSE` for more information.
-
-<div align="right">
-
-Built with ❤️ by [novakamiii](https://github.com/novakamiii)
-
-</div>
