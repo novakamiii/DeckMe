@@ -127,6 +127,20 @@
   --spacing-safe-bottom: env(safe-area-inset-bottom);
   --spacing-safe-left: env(safe-area-inset-left);
   --spacing-safe-right: env(safe-area-inset-right);
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Libre Baskerville', 'Times New Roman', serif;
+
+  --animate-squish: squish 3s ease-in-out infinite;
+
+  @keyframes squish {
+    0%, 100% {
+      transform: scale(1, 1);
+    }
+    50% {
+      transform: scale(1.05, 0.9);
+    }
+  }
 }
 
 @layer base {
