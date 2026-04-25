@@ -1,9 +1,0 @@
-{
-  "profile": "openai",
-  "env": {
-    "OPENAI_BASE_URL": "https://integrate.api.nvidia.com/v1",
-    "OPENAI_MODEL": "deepseek-ai/deepseek-v3.2",
-    "OPENAI_API_KEY": "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"
-  },
-  "createdAt": "2026-04-25T04:21:23.368Z"
-}
