@@ -47,10 +47,10 @@ DeckMe is an AnkiDeck inspired Application for both Desktop and Mobile Devices. 
 
 ### **Mobile**
 
-| ![Welcome Screen](public/previews/1m.png) | ![Study Session](public/previews/2m.png) |
+| ![Welcome Screen](public/previews/1m.jpg) | ![Study Session](public/previews/2m.jpg) |
 | :---: | :---: |
 | **Smart Onboarding** | **Active Recall Deck** |
-| ![Statistics](public/previews/3m.png) | ![Notes View](public/previews/4m.png) |
+| ![Statistics](public/previews/3m.jpg) | ![Notes View](public/previews/4m.jpg) |
 | **Progress Tracking** | **Structured Notes** |
 
 </div>
