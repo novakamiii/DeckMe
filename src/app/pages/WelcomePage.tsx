@@ -122,27 +122,30 @@ export function WelcomePage() {
             </p>
           </div>
 
-          <div className="relative">
-            <pre className="bg-muted p-6 rounded-lg overflow-auto max-h-48 md:max-h-96 text-sm font-mono">
-              {AI_PROMPT}
-            </pre>
-            <Button
-              onClick={handleCopy}
-              className="absolute top-4 right-4"
-              size="sm"
-            >
-              {copied ? (
-                <>
-                  <Check className="size-4 mr-2" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="size-4 mr-2" />
-                  Copy Prompt
-                </>
-              )}
-            </Button>
+          <div className="flex flex-col md:flex-row gap-6 items-center overflow-hidden">
+            <img src="/deki.png" alt="Deki Mascot" className="size-32 md:size-48 object-contain shrink-0 animate-squish origin-bottom" />
+            <div className="relative flex-1 w-full min-w-0">
+              <pre className="bg-muted p-6 rounded-lg overflow-auto max-h-48 md:max-h-96 text-sm font-mono w-full whitespace-pre-wrap break-words">
+                {AI_PROMPT}
+              </pre>
+              <Button
+                onClick={handleCopy}
+                className="absolute top-4 right-4"
+                size="sm"
+              >
+                {copied ? (
+                  <>
+                    <Check className="size-4 mr-2" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="size-4 mr-2" />
+                    Copy Prompt
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           <div className="text-center text-sm text-muted-foreground">
