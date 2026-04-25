@@ -8,22 +8,28 @@ import { Button } from "./ui/button";
 import { PanelLeft } from "lucide-react";
 
 function SidebarToggle() {
-  const { open, toggleSidebar } = useSidebar();
+  const { open, openMobile, toggleSidebar, isMobile } = useSidebar();
   
-  if (open) return null;
+  // Use direct window width check for initial render robustness
+  const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 768;
+  const isOpen = isSmallScreen ? openMobile : open;
+  
+  if (isOpen) return null;
   
   return (
     <Button
       onClick={toggleSidebar}
       size="icon"
       variant="outline"
-      className="fixed top-4 left-4 z-50 shadow-md bg-background"
+      className={`fixed ${isSmallScreen ? 'top-safe-top mt-4' : 'top-12'} left-4 z-50 shadow-md bg-background size-10 md:size-9 rounded-full md:rounded-md`}
       title="Open Sidebar"
     >
-      <PanelLeft className="size-4" />
+      <PanelLeft className="size-5 md:size-4" />
     </Button>
   );
 }
+
+import { TitleBar } from "./TitleBar";
 
 function RootLayoutContent() {
   const location = useLocation();
@@ -46,13 +52,18 @@ function RootLayoutContent() {
   }, [zenMode, setSidebarOpen]);
 
   return (
-    <div className="flex h-screen w-full">
-      {!zenMode && <AppSidebar />}
-      {!zenMode && <SidebarRail />}
-      {!zenMode && <SidebarToggle />}
-      <main className="flex-1 overflow-auto">
-        <Outlet context={{ sidebarOpen, zenMode, setZenMode }} />
-      </main>
+    <div className="flex flex-col h-svh w-full overflow-hidden bg-background">
+      <TitleBar />
+      <div className="flex flex-1 w-full overflow-hidden">
+        {!zenMode && <AppSidebar />}
+        {!zenMode && <SidebarRail />}
+        {!zenMode && <SidebarToggle />}
+        <main className="flex-1 overflow-auto pt-safe-top pb-safe-bottom pl-safe-left pr-safe-right">
+          <div className="h-full w-full p-4 md:p-8">
+            <Outlet context={{ sidebarOpen, zenMode, setZenMode }} />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
