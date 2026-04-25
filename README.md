@@ -6,7 +6,7 @@
 
 *"It was for personal use but meh why not share it?"*
 
-DeckMe is an AnkiDeck inspired Application for both Desktop and Android devices. Its main use is to help students and others alike to read quick notes and memorize information for upcoming tests and such.
+DeckMe is an AnkiDeck inspired Application for both Desktop and Mobile Devices. Its main use is to help students and others alike to read quick notes and memorize information for upcoming tests and such.
 
 [![Release](https://img.shields.io/github/v/release/novakamiii/DeckMe?color=344E41&labelColor=DAD7CD&style=flat-square)](https://github.com/novakamiii/DeckMe/releases)
 [![License](https://img.shields.io/github/license/novakamiii/DeckMe?color=344E41&labelColor=DAD7CD&style=flat-square)](LICENSE)
@@ -33,10 +33,24 @@ DeckMe is an AnkiDeck inspired Application for both Desktop and Android devices.
 
 <div align="center">
 
-| ![Welcome Screen](https://via.placeholder.com/400x250?text=Welcome+Screen+Snapshot) | ![Study Session](https://via.placeholder.com/400x250?text=Study+Session+Snapshot) |
+### **Desktop**
+
+| ![Welcome Screen](public/previews/1.png) | ![Study Session](public/previews/2.png) |
 | :---: | :---: |
 | **Smart Onboarding** | **Active Recall Deck** |
-| ![Statistics](https://via.placeholder.com/400x250?text=Statistics+Snapshot) | ![Notes View](https://via.placeholder.com/400x250?text=Notes+View+Snapshot) |
+| ![Statistics](public/previews/3.png) | ![Notes View](public/previews/4.png) |
+| **Progress Tracking** | **Structured Notes** |
+
+</div>
+
+<div align="center">
+
+### **Mobile**
+
+| ![Welcome Screen](public/previews/1m.png) | ![Study Session](public/previews/2m.png) |
+| :---: | :---: |
+| **Smart Onboarding** | **Active Recall Deck** |
+| ![Statistics](public/previews/3m.png) | ![Notes View](public/previews/4m.png) |
 | **Progress Tracking** | **Structured Notes** |
 
 </div>
