@@ -24,7 +24,11 @@ build/
 *.swo
 CLAUDE.md
 GEMINI.md
-AGENT.md
+AGENTS.md
+src-tauri/
+guidelines/
+android/
+
 
 # Android / Mobile
 android/build/
