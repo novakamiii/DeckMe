@@ -28,7 +28,8 @@ AGENTS.md
 src-tauri/
 guidelines/
 android/
-
+ATTRIBUTIONS.md
+.openclaude-profile.json
 
 # Android / Mobile
 android/build/
