@@ -21,7 +21,7 @@ DeckMe is an AnkiDeck inspired Application for both Desktop and Mobile Devices. 
 ## ✨ Features
 
 - **🤖 AI-Powered Conversion**: Simply copy our optimized AI prompt, paste it into your favorite LLM (Claude recommended), and get perfectly structured flashcard JSONs.
-- **📱 Cross-Platform**: Study anywhere. Native builds available for Windows, Linux, Android, and iOS.
+- **📱 Cross-Platform**: Study anywhere. Native builds available for Windows, Linux, Android, and iOS (coming soon?).
 - **🧘 Zen Mode**: A distraction-free interface designed for deep focus and active recall.
 - **⏱️ Pomodoro Integration**: Built-in timer to keep your study sessions structured and productive.
 - **📊 Performance Analytics**: Track your progress with detailed charts and time-tracking statistics.
