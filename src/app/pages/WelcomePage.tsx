@@ -7,7 +7,15 @@ import { Separator } from "../components/ui/separator";
 
 const AI_PROMPT = `# PDF TO JSON NOTES + ANKI DECK
 
-You are a professional teacher and a coding enthusiast that will transform this literatures, pictures, files and alike into Notes and Anki Deck reviewer that will be in JSON format. You will make two subsections inside a JSON file, one is for Notes and one is for Anki Deck. You will stay on subject within the theme of this files included in this prompt.
+You are a professional teacher and a coding enthusiast that will transform literature, pictures, files, and alike into structured Notes and an Anki Deck reviewer in JSON format. You will make two subsections inside a JSON file: one for Notes and one for the Anki Deck. Stay on subject within the theme of the files included in this prompt.
+
+**Default behavior: All content uses Markdown formatting (GFM). Use \`type: "markdown"\` unless a structured type (table, process, comparison) is clearly more appropriate. Mermaid diagrams are supported inside fenced code blocks with the \`mermaid\` language tag.**
+
+## GENERATION MODES
+
+- **markdown-rich** *(default)* — All notes prefer \`type: "markdown"\`. Use GFM throughout: \`**bold**\` for key terms, \`*italic*\` for emphasis, \`> blockquote\` for definitions, \`| table |\` for comparisons, \`\`\`mermaid\` for diagrams, \`\`\` \` for code/formulas, \`## subheadings\` inside content. Anki \`back\` fields also use Markdown.
+- **standard** — Balanced structured notes and Anki deck. Uses all types freely based on content shape.
+- **review** — Minimal notes (one summary \`type: "definition"\` per lesson). Heavy Anki deck (3+ cards per topic). Each card includes \`"difficulty": "easy" | "medium" | "hard"\`.
 
 # EXAMPLE (STRICTLY FOLLOW THIS FORMAT)
 
@@ -16,6 +24,7 @@ You are a professional teacher and a coding enthusiast that will transform this 
 {
   "_meta": {
     "title": "Lesson Title",
+    "mode": "markdown-rich",
     "lessons": [
       "Notes 1: Title",
       "Chapter 2: Title",
@@ -30,8 +39,8 @@ You are a professional teacher and a coding enthusiast that will transform this 
           "lesson": "string — lesson or chapter name",
           "topic": "string — main topic heading",
           "subtopic": "string | null — optional subtopic heading",
-          "content": "string | string[] | Record<string, any>[] — narrative explanation or list of key points",
-          "type": "string — 'definition' | 'list' | 'table' | 'process' | 'comparison'"
+          "content": "string (GFM Markdown: **bold**, *italic*, \`code\`, > blockquote, ## heading, | table |, \`\`\`mermaid) | string[] | Record<string, any>[]",
+          "type": "string — 'markdown' (default) | 'definition' | 'list' | 'table' | 'process' | 'comparison'"
         }
       },
       "anki_deck": {
@@ -39,68 +48,52 @@ You are a professional teacher and a coding enthusiast that will transform this 
         "structure": {
           "id": "string — unique card identifier",
           "lesson": "string — source lesson",
-          "front": "string — question or prompt shown to the learner",
-          "back": "string | string[] — answer, explanation, or list of points",
-          "tag": "string — category tag for filtering"
+          "front": "string — question or prompt",
+          "back": "string (GFM Markdown — **bold** key terms, \`code\` for formulas, > for definitions) | string[]",
+          "tag": "string — category tag for filtering",
+          "difficulty": "string | null — 'easy' | 'medium' | 'hard' (used in review mode)"
         }
       }
     }
   }
 }
 
-### TYPES EXAMPLE FORMAT
+### TYPE EXAMPLES
 
-"type": "table",
-      "content": [
-        {
-          "contributor": "Mary Parker Follett (Mother of Modern Management)",
-          "definition": "The art of getting things done through people."
-        },
-        ]
+// DEFAULT — use this unless structured type is clearly better
+"type": "markdown",
+"content": "## The Accounting Equation\\n\\n> **Assets = Liabilities + Owner's Equity**\\n\\nThis equation must *always balance*. Every transaction affects at least two accounts to maintain this balance.\\n\\n| Component | Examples |\\n|-----------|----------|\\n| Assets | Cash, Equipment, Inventory |\\n| Liabilities | Loans, Accounts Payable |\\n| Owner's Equity | Capital, Retained Earnings |"
 
-"type": "list",
-      "content": [
-        "Practical Knowledge — theories must be applied to real situations",
-        "Personal Skill — a manager must have unique qualities beyond book knowledge",
-        "Creativity — finding new ways to solve problems and differentiate",
-        "Perfection through Practice — managers improve with experience over time",
-        "Goal-Oriented — art is result-driven, so is management"
-      ]
+// Mermaid diagrams — use \`\`\`mermaid inside the markdown content:
+"type": "markdown",
+"content": "## System Architecture\\n\\nHere is the system flow:\\n\\n\`\`\`mermaid\\nflowchart LR\\n    A[Client] --> B[API Gateway]\\n    B --> C[Auth Service]\\n    B --> D[Data Service]\\n    C --> E[(User DB)]\\n    D --> F[(Main DB)]\\n\`\`\`"
 
-"type": "definition",
-      "content": "Forecasting is an attempt to foretell or predict future trends, events, or conditions from known facts to prepare for expected changes in business or industry. It is a systematic approach to probe future business events from available data and information. Business forecasting involves statistical analysis of past and current movements to obtain clues about future patterns."
-
-"type": "comparison",
-      "content": [
-        {
-          "point": "Origin",
-          "formal": "Created deliberately",
-          "informal": "Arises spontaneously"
-        },
-        {
-          "point": "Nature",
-          "formal": "Planned and official",
-          "informal": "Unplanned and unofficial"
-        }
-        ]
+// Only use structured types when content is inherently tabular or sequential:
 
 "type": "process",
-      "content": [
-        "Step 1: Outlining the objectives",
-        "Step 2: Identification and enumeration of the activities",
-        "Step 3: Assigning the duties and responsibilities",
-        "Step 4: Delegating the authority",
-        "Step 5: Establishing authority relationships"
-      ]
+"content": [
+  "Step 1: Outlining the objectives",
+  "Step 2: Identification and enumeration of activities",
+  "Step 3: Assigning duties and responsibilities",
+  "Step 4: Delegating the authority",
+  "Step 5: Establishing authority relationships"
+]
+
+"type": "comparison",
+"content": [
+  { "point": "Origin", "formal": "Created deliberately", "informal": "Arises spontaneously" },
+  { "point": "Nature", "formal": "Planned and official", "informal": "Unplanned and unofficial" }
+]
 
 ### ANKI DECK FORMAT
-    {
-      "id": "A-C4-010",
-      "lesson": "Chapter 4",
-      "tag": "departmentation",
-      "front": "What is Departmentation?",
-      "back": "Departmentation is dividing the large and monolithic functional organization into smaller, flexible administrative units. For example, a CEO oversees departments such as Marketing, Production, Human Resources, Information Technology, and Customer Service."
-    }`;
+{
+  "id": "A-C4-010",
+  "lesson": "Chapter 4",
+  "tag": "departmentation",
+  "front": "What is Departmentation?",
+  "back": "**Departmentation** is dividing a large organization into smaller, flexible administrative units.\\n\\n> Example: A CEO oversees \`Marketing\`, \`HR\`, \`IT\`, \`Production\`, and \`Customer Service\` departments.",
+  "difficulty": null
+}`;
 
 export function WelcomePage() {
   const [copied, setCopied] = useState(false);

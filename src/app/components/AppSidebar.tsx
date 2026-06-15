@@ -44,8 +44,8 @@ export function AppSidebar() {
                     {subjects.map((subject) => (
                       <SidebarMenuItem key={subject.id}>
                         <SidebarMenuButton asChild>
-                          <Link to={`/subject/${subject.id}`}>
-                            {subject.title}
+                          <Link to={`/subject/${subject.id}`} className="truncate">
+                            {subject.title.split(" ").slice(0, 5).join(" ")}{subject.title.split(" ").length > 5 ? "…" : ""}
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>

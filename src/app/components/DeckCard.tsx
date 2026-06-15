@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { MarkdownNote } from "./notes/MarkdownNote";
 
 interface DeckCardProps {
   card: AnkiCard;
@@ -26,11 +27,9 @@ export function DeckCard({ card, onAnswer }: DeckCardProps) {
   return (
     <Card className="font-notes max-w-2xl mx-auto">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <div className="text-sm text-muted-foreground">{card.lesson}</div>
-            <Badge variant="secondary">{card.tag}</Badge>
-          </div>
+        <div className="flex items-start justify-between gap-2">
+          <div className="text-sm text-muted-foreground">{card.lesson}</div>
+          <Badge variant="secondary" className="shrink-0">{card.tag}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -48,7 +47,7 @@ export function DeckCard({ card, onAnswer }: DeckCardProps) {
             <div className="text-center">
               <div className="text-sm text-muted-foreground mb-2">Answer</div>
               {Array.isArray(card.back) ? (
-                <ul className="text-left space-y-2 max-w-md mx-auto">
+                <ul className="inline-block text-left space-y-2 max-w-md">
                   {card.back.map((item, index) => (
                     <li key={index} className="flex items-start">
                       <span className="text-primary mr-2">•</span>
@@ -57,28 +56,30 @@ export function DeckCard({ card, onAnswer }: DeckCardProps) {
                   ))}
                 </ul>
               ) : (
-                <p className="text-lg">{card.back}</p>
+                <div>
+                  <MarkdownNote content={card.back} />
+                </div>
               )}
             </div>
           )}
         </div>
 
         {isFlipped && !answered && (
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button
               onClick={() => handleAnswer(false)}
               variant="outline"
-              className="flex-1 max-w-xs"
+              className="w-full sm:flex-1"
             >
-              <XCircle className="size-5 mr-2 text-destructive" />
+              <XCircle className="size-4 sm:size-5 mr-1.5 text-destructive shrink-0" />
               Wrong Guess
             </Button>
             <Button
               onClick={() => handleAnswer(true)}
               variant="default"
-              className="flex-1 max-w-xs"
+              className="w-full sm:flex-1"
             >
-              <CheckCircle2 className="size-5 mr-2" />
+              <CheckCircle2 className="size-4 sm:size-5 mr-1.5 shrink-0" />
               Guessed Right
             </Button>
           </div>

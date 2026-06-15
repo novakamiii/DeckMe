@@ -35,6 +35,21 @@ export const validateSubjectData = (data: any): data is SubjectData => {
     typeof data._meta.title === 'string' &&
     Array.isArray(data._meta.lessons) &&
     Array.isArray(data.notes) &&
-    Array.isArray(data.anki_deck)
+    Array.isArray(data.anki_deck) &&
+    // Validate individual notes have required fields
+    data.notes.every((note: any) =>
+      typeof note.id === 'string' &&
+      typeof note.lesson === 'string' &&
+      typeof note.topic === 'string' &&
+      ['markdown', 'definition', 'list', 'table', 'process', 'comparison'].includes(note.type)
+    ) &&
+    // Validate individual anki cards have required fields
+    data.anki_deck.every((card: any) =>
+      typeof card.id === 'string' &&
+      typeof card.lesson === 'string' &&
+      typeof card.tag === 'string' &&
+      typeof card.front === 'string' &&
+      (typeof card.back === 'string' || Array.isArray(card.back))
+    )
   );
 };

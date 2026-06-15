@@ -1,13 +1,18 @@
 import { useParams, useOutletContext } from "react-router";
-import { useEffect, useState } from "react";
-import { getSubjectData, initializeDeckStats, saveDeckStats, saveViewedTime, DeckStats } from "../lib/mockData";
+import { useEffect, useState, useMemo } from "react";
+import {
+  getSubjectData, initializeDeckStats, saveDeckStats, saveViewedTime,
+  loadDeckSession, saveDeckSession, shuffleArray,
+  type DeckStats, type AnkiCard,
+} from "../lib/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { NoteCard } from "../components/notes/NoteCard";
 import { DeckCard } from "../components/DeckCard";
 import { PomodoroTimer } from "../components/PomodoroTimer";
 import { Progress } from "../components/ui/progress";
 import { Button } from "../components/ui/button";
-import { Eye, EyeOff, RotateCcw, BookOpen } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Eye, EyeOff, RotateCcw, BookOpen, Shuffle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
 interface OutletContext {
@@ -66,9 +71,10 @@ function CompletionCard({ correct, wrong, onRetry, onGoToNotes }: CompletionCard
 
 interface ZenModeProps {
   subject: ReturnType<typeof getSubjectData>;
-  currentCardIndex: number;
-  totalCards: number;
-  onCardIndexChange: (index: number) => void;
+  currentCard: AnkiCard | undefined;
+  filteredTotal: number;
+  filteredIndex: number;
+  onFilteredIndexChange: (index: number) => void;
   onTimeUpdate: (seconds: number) => void;
   onExit: () => void;
   onAnswer: (correct: boolean) => void;
@@ -76,13 +82,18 @@ interface ZenModeProps {
   onRetry: () => void;
   onTabChange: (tab: string) => void;
   activeTab: string;
+  categories: string[];
+  selectedCategory: string | null;
+  onCategoryChange: (category: string | null) => void;
+  onShuffle: () => void;
 }
 
 function ZenModeView({
   subject,
-  currentCardIndex,
-  totalCards,
-  onCardIndexChange,
+  currentCard,
+  filteredTotal,
+  filteredIndex,
+  onFilteredIndexChange,
   onTimeUpdate,
   onExit,
   onAnswer,
@@ -90,23 +101,32 @@ function ZenModeView({
   onRetry,
   onTabChange,
   activeTab,
+  categories,
+  selectedCategory,
+  onCategoryChange,
+  onShuffle,
 }: ZenModeProps) {
-  const progressPercentage = totalCards > 0 ? ((currentCardIndex) / totalCards) * 100 : 0;
-  const isComplete = currentCardIndex >= totalCards && totalCards > 0;
+  const isComplete = filteredTotal === 0 || (filteredTotal > 0 && filteredIndex >= filteredTotal);
 
   const handleAnswer = (correct: boolean) => {
     onAnswer(correct);
-    if (subject && currentCardIndex + 1 < subject.anki_deck.length) {
-      onCardIndexChange(currentCardIndex + 1);
-    } else if (subject) {
-      onCardIndexChange(subject.anki_deck.length);
-    }
+    onFilteredIndexChange(filteredIndex + 1);
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="flex items-center justify-center pt-4 pb-2">
+      <div className="relative pt-4 pb-2 px-4">
         <h1 className="text-xl font-semibold text-center">{subject?._meta.title}</h1>
+        <Button
+          onClick={onExit}
+          variant="outline"
+          size="sm"
+          className="absolute right-4 top-4 gap-1.5"
+          title="Exit Zen Mode"
+        >
+          <EyeOff className="size-4" />
+          <span className="hidden sm:inline">Exit Zen</span>
+        </Button>
       </div>
 
       <div className="flex justify-center pb-4">
@@ -139,12 +159,12 @@ function ZenModeView({
             ) : (
               <div className="space-y-6">
                 <div className="text-center text-sm text-muted-foreground">
-                  Card {currentCardIndex + 1} of {totalCards}
+                  Card {filteredIndex + 1} of {filteredTotal}
                 </div>
-                {subject.anki_deck.length > 0 && currentCardIndex < subject.anki_deck.length && (
+                {currentCard && (
                   <DeckCard
-                    key={`${subject.anki_deck[currentCardIndex].id}-${currentCardIndex}`}
-                    card={subject.anki_deck[currentCardIndex]}
+                    key={`${currentCard.id}-${filteredIndex}`}
+                    card={currentCard}
                     onAnswer={handleAnswer}
                   />
                 )}
@@ -154,59 +174,116 @@ function ZenModeView({
         )}
       </div>
 
-      <div className="fixed bottom-8 right-4 z-50">
-        <Button
-          onClick={onExit}
-          size="icon"
-          variant="outline"
-          title="Exit Zen Mode"
-        >
-          <EyeOff className="size-4" />
-        </Button>
-      </div>
+      {/* Bottom controls — shuffle + category */}
+      {!isComplete && (
+        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-background border border-border rounded-xl px-4 py-3 shadow-lg z-50">
+          <Button
+            onClick={onShuffle}
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            title="Shuffle deck"
+          >
+            <Shuffle className="size-4" />
+            Shuffle
+          </Button>
 
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-        <PomodoroTimer onTimeUpdate={onTimeUpdate} />
-      </div>
+          <div className="w-px h-6 bg-border" />
+
+          <Select
+            value={selectedCategory ?? "all"}
+            onValueChange={(v) => onCategoryChange(v === "all" ? null : v)}
+          >
+            <SelectTrigger className="w-44" size="sm">
+              <SelectValue placeholder="Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      <PomodoroTimer onTimeUpdate={onTimeUpdate} />
     </div>
   );
 }
 
 export function SubjectPage() {
   const { subjectId } = useParams<{ subjectId: string }>();
-  const { sidebarOpen, zenMode, setZenMode } = useOutletContext<OutletContext>();
+  const { zenMode, setZenMode } = useOutletContext<OutletContext>();
   const [subject, setSubject] = useState(getSubjectData(subjectId!));
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [deckStats, setDeckStats] = useState<DeckStats>(initializeDeckStats(subjectId!));
   const [activeTab, setActiveTab] = useState("notes");
 
-  useEffect(() => {
-    if (subjectId) {
-      setSubject(getSubjectData(subjectId));
-      setDeckStats(initializeDeckStats(subjectId));
-    }
-  }, [subjectId]);
+  // ─── Deck shuffle + category state ───
+  const [shuffledOrder, setShuffledOrder] = useState<AnkiCard[]>([]);
+  const [filteredIndex, setFilteredIndex] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [sessionLoaded, setSessionLoaded] = useState(false);
 
+  // Derived
+  const filteredCards = useMemo(() => {
+    if (!selectedCategory) return shuffledOrder;
+    return shuffledOrder.filter((c) => c.lesson === selectedCategory);
+  }, [shuffledOrder, selectedCategory]);
+
+  const currentCard = filteredCards[filteredIndex];
+  const isDeckComplete = filteredCards.length > 0 && filteredIndex >= filteredCards.length;
+  const categories = useMemo(() => {
+    if (!subject) return [];
+    return [...new Set(subject.anki_deck.map((c) => c.lesson))];
+  }, [subject]);
+
+  // ─── Init ───
   useEffect(() => {
     if (!subjectId) return;
 
-    let interval: NodeJS.Timeout | null = null;
+    const data = getSubjectData(subjectId);
+    setSubject(data);
+    setDeckStats(initializeDeckStats(subjectId));
 
-    interval = setInterval(() => {
-      saveViewedTime(subjectId, 1);
-    }, 1000);
+    if (data) {
+      const session = loadDeckSession(subjectId);
+      const deckLen = data.anki_deck.length;
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
+      if (
+        session &&
+        session.currentIndex < deckLen &&
+        session.shuffledOrder.length === deckLen
+      ) {
+        // Resume mid-session — keep existing order and progress
+        setShuffledOrder(session.shuffledOrder);
+        setFilteredIndex(session.currentIndex);
+      } else {
+        // New session — auto-shuffle
+        const shuffled = shuffleArray(data.anki_deck);
+        setShuffledOrder(shuffled);
+        setFilteredIndex(0);
+        saveDeckSession(subjectId, { shuffledOrder: shuffled, currentIndex: 0 });
+      }
+      setSelectedCategory(null);
+      setSessionLoaded(true);
+    }
+  }, [subjectId]);
+
+  // ⏱ Time tracking
+  useEffect(() => {
+    if (!subjectId) return;
+    const interval = setInterval(() => saveViewedTime(subjectId, 1), 1000);
+    return () => clearInterval(interval);
   }, [subjectId]);
 
   const handleTimeUpdate = (seconds: number) => {
-    if (subjectId) {
-      saveViewedTime(subjectId, seconds);
-    }
+    if (subjectId) saveViewedTime(subjectId, seconds);
   };
 
+  // ─── Answer ───
   const handleAnswer = (correct: boolean) => {
     const newStats = {
       correct: deckStats.correct + (correct ? 1 : 0),
@@ -216,14 +293,44 @@ export function SubjectPage() {
     saveDeckStats(subjectId!, newStats);
   };
 
-  const handleRetry = () => {
-    setCurrentCardIndex(0);
-    setDeckStats({ correct: 0, wrong: 0 });
+  // ─── Advance (called after answer, in both normal and zen) ───
+  const handleAdvance = () => {
+    const next = filteredIndex + 1;
+    setFilteredIndex(next);
     if (subjectId) {
-      saveDeckStats(subjectId, { correct: 0, wrong: 0 });
+      saveDeckSession(subjectId, { shuffledOrder, currentIndex: next });
     }
   };
 
+  // ─── Shuffle ───
+  const handleShuffle = () => {
+    if (!subject || !subjectId) return;
+    const shuffled = shuffleArray(shuffledOrder.length > 0 ? shuffledOrder : subject.anki_deck);
+    setShuffledOrder(shuffled);
+    setFilteredIndex(0);
+    setSelectedCategory(null);
+    saveDeckSession(subjectId, { shuffledOrder: shuffled, currentIndex: 0 });
+  };
+
+  // ─── Category change ───
+  const handleCategoryChange = (category: string | null) => {
+    setSelectedCategory(category);
+    setFilteredIndex(0);
+  };
+
+  // ─── Retry (complete reset) ───
+  const handleRetry = () => {
+    if (!subject || !subjectId) return;
+    const shuffled = shuffleArray(subject.anki_deck);
+    setShuffledOrder(shuffled);
+    setFilteredIndex(0);
+    setSelectedCategory(null);
+    setDeckStats({ correct: 0, wrong: 0 });
+    saveDeckSession(subjectId, { shuffledOrder: shuffled, currentIndex: 0 });
+    saveDeckStats(subjectId, { correct: 0, wrong: 0 });
+  };
+
+  // ─── Loading / error states ───
   if (!subject) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -232,28 +339,48 @@ export function SubjectPage() {
     );
   }
 
+  if (!sessionLoaded) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground animate-pulse">Loading deck...</p>
+      </div>
+    );
+  }
+
   const totalAttempts = deckStats.correct + deckStats.wrong;
   const correctPercentage = totalAttempts > 0 ? (deckStats.correct / totalAttempts) * 100 : 0;
-  const isDeckComplete = currentCardIndex >= subject.anki_deck.length && subject.anki_deck.length > 0;
 
+  // ─── Zen Mode ───
   if (zenMode) {
     return (
       <ZenModeView
         subject={subject}
-        currentCardIndex={currentCardIndex}
-        totalCards={subject.anki_deck.length}
-        onCardIndexChange={setCurrentCardIndex}
+        currentCard={currentCard}
+        filteredTotal={filteredCards.length}
+        filteredIndex={filteredIndex}
+        onFilteredIndexChange={(i) => {
+          setFilteredIndex(i);
+          if (subjectId) saveDeckSession(subjectId, { shuffledOrder, currentIndex: i });
+        }}
         onTimeUpdate={handleTimeUpdate}
         onExit={() => setZenMode(false)}
-        onAnswer={handleAnswer}
+        onAnswer={(correct) => {
+          handleAnswer(correct);
+          handleAdvance();
+        }}
         deckStats={deckStats}
         onRetry={handleRetry}
         onTabChange={setActiveTab}
         activeTab={activeTab}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={handleCategoryChange}
+        onShuffle={handleShuffle}
       />
     );
   }
 
+  // ─── Normal mode ───
   return (
     <div className="max-w-7xl mx-auto pb-32">
       <div className="mb-6 flex items-center justify-between">
@@ -310,33 +437,60 @@ export function SubjectPage() {
                   </div>
                   <Progress value={correctPercentage} />
                   <div className="text-center text-sm text-muted-foreground">
-                    Card {currentCardIndex + 1} of {subject.anki_deck.length}
+                    Card {filteredIndex + 1} of {filteredCards.length}
                   </div>
                 </div>
 
-                {subject.anki_deck.length > 0 && (
+                {currentCard && (
                   <DeckCard
-                    key={`${subject.anki_deck[currentCardIndex].id}-${currentCardIndex}`}
-                    card={subject.anki_deck[currentCardIndex]}
+                    key={`${currentCard.id}-${filteredIndex}`}
+                    card={currentCard}
                     onAnswer={(correct) => {
                       handleAnswer(correct);
-                      if (currentCardIndex + 1 < subject.anki_deck.length) {
-                        setCurrentCardIndex((prev) => prev + 1);
-                      } else {
-                        setCurrentCardIndex(subject.anki_deck.length);
-                      }
+                      handleAdvance();
                     }}
                   />
                 )}
               </>
             )}
+
+            {!isDeckComplete && shuffledOrder.length > 0 && (
+              <div className="flex items-center justify-center gap-3 pt-2 pb-8">
+                <Button
+                  onClick={handleShuffle}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                >
+                  <Shuffle className="size-4" />
+                  Shuffle
+                </Button>
+
+                <div className="w-px h-6 bg-border" />
+
+                <Select
+                  value={selectedCategory ?? "all"}
+                  onValueChange={(v) => handleCategoryChange(v === "all" ? null : v)}
+                >
+                  <SelectTrigger className="w-44" size="sm">
+                    <SelectValue placeholder="Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>
 
-      <div className={`fixed bottom-safe-bottom z-50 transition-all duration-300 mb-8 ${sidebarOpen ? 'right-8' : 'left-1/2 -translate-x-1/2'}`}>
-        <PomodoroTimer onTimeUpdate={handleTimeUpdate} />
-      </div>
+      <PomodoroTimer onTimeUpdate={handleTimeUpdate} />
     </div>
   );
 }

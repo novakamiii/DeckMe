@@ -4,7 +4,7 @@ export interface NoteContent {
   topic: string;
   subtopic: string | null;
   content: string | string[] | Record<string, any>[];
-  type: 'definition' | 'list' | 'table' | 'process' | 'comparison';
+  type: 'markdown' | 'definition' | 'list' | 'table' | 'process' | 'comparison';
 }
 
 export interface AnkiCard {
@@ -13,12 +13,15 @@ export interface AnkiCard {
   tag: string;
   front: string;
   back: string | string[];
+  difficulty?: 'easy' | 'medium' | 'hard' | null;
 }
 
 export interface SubjectData {
   _meta: {
     title: string;
     lessons: string[];
+    mode?: 'markdown-rich' | 'standard' | 'review';
+    schema_preview?: Record<string, any>;
   };
   notes: NoteContent[];
   anki_deck: AnkiCard[];
@@ -169,7 +172,8 @@ export const mockSubjects: Record<string, SubjectData> = {
   'accounting': {
     _meta: {
       title: 'Accounting',
-      lessons: ['Chapter 1: Introduction to Accounting', 'Chapter 2: Double Entry System']
+      lessons: ['Chapter 1: Introduction to Accounting', 'Chapter 2: Double Entry System'],
+      mode: 'standard'
     },
     notes: [
       {
@@ -177,8 +181,8 @@ export const mockSubjects: Record<string, SubjectData> = {
         lesson: 'Chapter 1',
         topic: 'Accounting Equation',
         subtopic: null,
-        type: 'definition',
-        content: 'Assets = Liabilities + Owner\'s Equity. This fundamental equation represents the relationship between what a business owns (assets), what it owes (liabilities), and the owner\'s claim (equity).'
+        type: 'markdown',
+        content: '## The Accounting Equation\n\n> **Assets = Liabilities + Owner\'s Equity**\n\nThis fundamental equation represents the relationship between what a business **owns** (assets), what it **owes** (liabilities), and the owner\'s *claim* (equity).\n\n| Component | Description |\n|-----------|-------------|\n| Assets | Resources owned by the business |\n| Liabilities | Obligations owed to others |\n| Equity | Owner\'s residual interest |\n\n```\nAssets = Liabilities + Equity\n```\n\n### Transaction Flow\n\n```mermaid\nflowchart LR\n    A[Transaction Occurs] --> B{Assets = Liabilities + Equity?}\n    B -->|Yes| C[Record in Journal]\n    B -->|No| D[Find Error]\n    D --> A\n    C --> E[Post to Ledger]\n```'
       },
       {
         id: 'N-ACC-002',
@@ -262,3 +266,36 @@ export const saveViewedTime = (subjectId: string, seconds: number): void => {
   const current = getViewedTime(subjectId);
   localStorage.setItem(`deckme_time_${subjectId}`, (current + seconds).toString());
 };
+
+// ─── Deck session persistence (shuffled order + progress) ───
+
+export interface DeckSession {
+  shuffledOrder: AnkiCard[];
+  currentIndex: number;
+}
+
+export function loadDeckSession(subjectId: string): DeckSession | null {
+  try {
+    const data = localStorage.getItem(`deckme_session_${subjectId}`);
+    return data ? JSON.parse(data) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveDeckSession(subjectId: string, session: DeckSession): void {
+  localStorage.setItem(`deckme_session_${subjectId}`, JSON.stringify(session));
+}
+
+export function clearDeckSession(subjectId: string): void {
+  localStorage.removeItem(`deckme_session_${subjectId}`);
+}
+
+export function shuffleArray<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}

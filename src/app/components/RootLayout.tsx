@@ -6,25 +6,27 @@ import { Toaster } from "./ui/sonner";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { PanelLeft } from "lucide-react";
+import { UpdateNotifier } from "./UpdateNotifier";
 
 function SidebarToggle() {
-  const { open, openMobile, toggleSidebar, isMobile } = useSidebar();
+  const { open, openMobile, toggleSidebar } = useSidebar();
   
   // Use direct window width check for initial render robustness
   const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 768;
   const isOpen = isSmallScreen ? openMobile : open;
   
   if (isOpen) return null;
-  
+
   return (
     <Button
       onClick={toggleSidebar}
-      size="icon"
-      variant="outline"
-      className={`fixed ${isSmallScreen ? 'top-safe-top mt-4' : 'top-12'} left-4 z-50 shadow-md bg-background size-10 md:size-9 rounded-full md:rounded-md`}
+      variant="default"
+      size={isSmallScreen ? "icon" : "default"}
+      className={`fixed ${isSmallScreen ? 'top-4' : 'top-12'} left-4 z-50 shadow-lg ${isSmallScreen ? 'size-10 rounded-full' : 'px-3 py-2 rounded-md gap-2'}`}
       title="Open Sidebar"
     >
-      <PanelLeft className="size-5 md:size-4" />
+      <PanelLeft className="size-5" />
+      <span className="hidden md:inline">Menu</span>
     </Button>
   );
 }
@@ -53,6 +55,7 @@ function RootLayoutContent() {
 
   return (
     <div className="flex flex-col h-svh w-full overflow-hidden bg-background">
+      <UpdateNotifier />
       <TitleBar />
       <div className="flex flex-1 w-full overflow-hidden">
         {!zenMode && <AppSidebar />}

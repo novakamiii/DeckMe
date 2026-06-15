@@ -1,5 +1,6 @@
 import { NoteContent } from "../../lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { MarkdownNote } from "./MarkdownNote";
 import { DefinitionNote } from "./DefinitionNote";
 import { ListNote } from "./ListNote";
 import { TableNote } from "./TableNote";
@@ -23,6 +24,7 @@ export function NoteCard({ note }: NoteCardProps) {
         </div>
       </CardHeader>
       <CardContent>
+        {note.type === 'markdown' && <MarkdownNote content={note.content as string} />}
         {note.type === 'definition' && <DefinitionNote content={note.content as string} />}
         {note.type === 'list' && <ListNote content={note.content as string[]} />}
         {note.type === 'table' && <TableNote content={note.content as Record<string, any>[]} />}
