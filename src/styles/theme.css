@@ -203,3 +203,16 @@
     line-height: 1.5;
   }
 }
+
+/* Search hits inside notes */
+mark[data-deckme-highlight] {
+  background-color: color-mix(in srgb, var(--secondary) 45%, transparent);
+  color: inherit;
+  border-radius: 0.2rem;
+  padding: 0 0.1em;
+}
+
+mark[data-deckme-highlight].deckme-match-active {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}

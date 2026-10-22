@@ -2,6 +2,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 import { MermaidDiagram } from "./MermaidDiagram";
+import { withoutNodeProp } from "./markdown";
 
 interface MarkdownNoteProps {
   content: string;
@@ -128,12 +129,14 @@ const markdownComponents: Components = {
   ),
 };
 
+const safeMarkdownComponents = withoutNodeProp(markdownComponents);
+
 export function MarkdownNote({ content }: MarkdownNoteProps) {
   return (
     <div>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        components={markdownComponents}
+        components={safeMarkdownComponents}
       >
         {content}
       </ReactMarkdown>

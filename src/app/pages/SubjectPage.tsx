@@ -5,14 +5,15 @@ import {
   loadDeckSession, saveDeckSession, shuffleArray,
   type DeckStats, type AnkiCard,
 } from "../lib/mockData";
+import { filterCards, termsOf } from "../lib/search";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { NoteCard } from "../components/notes/NoteCard";
+import { NotesPanel } from "../components/notes/NotesPanel";
 import { DeckCard } from "../components/DeckCard";
+import { SubjectToolbar } from "../components/SubjectToolbar";
 import { PomodoroTimer } from "../components/PomodoroTimer";
 import { Progress } from "../components/ui/progress";
 import { Button } from "../components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Eye, EyeOff, RotateCcw, BookOpen, Shuffle } from "lucide-react";
+import { Eye, EyeOff, RotateCcw, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
 interface OutletContext {
@@ -86,6 +87,15 @@ interface ZenModeProps {
   selectedCategory: string | null;
   onCategoryChange: (category: string | null) => void;
   onShuffle: () => void;
+  lessons: string[];
+  notesQuery: string;
+  onNotesQueryChange: (query: string) => void;
+  notesLesson: string | null;
+  onNotesLessonChange: (lesson: string | null) => void;
+  deckQuery: string;
+  onDeckQueryChange: (query: string) => void;
+  deckTerms: string[];
+  hasCards: boolean;
 }
 
 function ZenModeView({
@@ -105,12 +115,20 @@ function ZenModeView({
   selectedCategory,
   onCategoryChange,
   onShuffle,
+  lessons,
+  notesQuery,
+  onNotesQueryChange,
+  notesLesson,
+  onNotesLessonChange,
+  deckQuery,
+  onDeckQueryChange,
+  deckTerms,
+  hasCards,
 }: ZenModeProps) {
-  const isComplete = filteredTotal === 0 || (filteredTotal > 0 && filteredIndex >= filteredTotal);
+  const isComplete = filteredTotal > 0 && filteredIndex >= filteredTotal;
 
   const handleAnswer = (correct: boolean) => {
     onAnswer(correct);
-    onFilteredIndexChange(filteredIndex + 1);
   };
 
   return (
@@ -140,10 +158,15 @@ function ZenModeView({
 
       <div className="flex-1 overflow-auto px-4 pb-32">
         {activeTab === "notes" && subject && (
-          <div className="max-w-3xl mx-auto space-y-6">
-            {subject.notes.map((note) => (
-              <NoteCard key={note.id} note={note} />
-            ))}
+          <div className="max-w-3xl mx-auto">
+            <NotesPanel
+              notes={subject.notes}
+              lessons={lessons}
+              query={notesQuery}
+              onQueryChange={onNotesQueryChange}
+              selectedLesson={notesLesson}
+              onLessonChange={onNotesLessonChange}
+            />
           </div>
         )}
 
@@ -158,56 +181,44 @@ function ZenModeView({
               />
             ) : (
               <div className="space-y-6">
-                <div className="text-center text-sm text-muted-foreground">
-                  Card {filteredIndex + 1} of {filteredTotal}
-                </div>
-                {currentCard && (
+                <SubjectToolbar
+                  query={deckQuery}
+                  onQueryChange={onDeckQueryChange}
+                  lessons={categories}
+                  selectedLesson={selectedCategory}
+                  onLessonChange={onCategoryChange}
+                  status={
+                    filteredTotal > 0
+                      ? `Card ${filteredIndex + 1} of ${filteredTotal}`
+                      : "No cards"
+                  }
+                  onPrevious={() => onFilteredIndexChange(filteredIndex - 1)}
+                  onNext={() => onFilteredIndexChange(filteredIndex + 1)}
+                  previousLabel="Previous card"
+                  nextLabel="Next card"
+                  canNavigate={filteredTotal > 0}
+                  onShuffle={onShuffle}
+                />
+
+                {currentCard ? (
                   <DeckCard
                     key={`${currentCard.id}-${filteredIndex}`}
                     card={currentCard}
+                    searchTerms={deckTerms}
                     onAnswer={handleAnswer}
                   />
+                ) : (
+                  <p className="py-10 text-center text-sm text-muted-foreground">
+                    {hasCards
+                      ? "No cards match the current filters."
+                      : "This subject has no deck cards yet."}
+                  </p>
                 )}
               </div>
             )}
           </div>
         )}
       </div>
-
-      {/* Bottom controls — shuffle + category */}
-      {!isComplete && (
-        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-background border border-border rounded-xl px-4 py-3 shadow-lg z-50">
-          <Button
-            onClick={onShuffle}
-            variant="outline"
-            size="sm"
-            className="gap-1.5"
-            title="Shuffle deck"
-          >
-            <Shuffle className="size-4" />
-            Shuffle
-          </Button>
-
-          <div className="w-px h-6 bg-border" />
-
-          <Select
-            value={selectedCategory ?? "all"}
-            onValueChange={(v) => onCategoryChange(v === "all" ? null : v)}
-          >
-            <SelectTrigger className="w-44" size="sm">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {categories.map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
 
       <PomodoroTimer onTimeUpdate={onTimeUpdate} />
     </div>
@@ -227,17 +238,31 @@ export function SubjectPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sessionLoaded, setSessionLoaded] = useState(false);
 
+  // ─── Notes search + lesson state ───
+  const [notesQuery, setNotesQuery] = useState("");
+  const [notesLesson, setNotesLesson] = useState<string | null>(null);
+
+  // ─── Deck search state ───
+  const [deckQuery, setDeckQuery] = useState("");
+
   // Derived
+  const deckTerms = useMemo(() => termsOf(deckQuery), [deckQuery]);
   const filteredCards = useMemo(() => {
-    if (!selectedCategory) return shuffledOrder;
-    return shuffledOrder.filter((c) => c.lesson === selectedCategory);
-  }, [shuffledOrder, selectedCategory]);
+    const byLesson = selectedCategory
+      ? shuffledOrder.filter((c) => c.lesson === selectedCategory)
+      : shuffledOrder;
+    return filterCards(byLesson, deckTerms);
+  }, [shuffledOrder, selectedCategory, deckTerms]);
 
   const currentCard = filteredCards[filteredIndex];
   const isDeckComplete = filteredCards.length > 0 && filteredIndex >= filteredCards.length;
   const categories = useMemo(() => {
     if (!subject) return [];
     return [...new Set(subject.anki_deck.map((c) => c.lesson))];
+  }, [subject]);
+  const lessons = useMemo(() => {
+    if (!subject) return [];
+    return [...new Set(subject.notes.map((n) => n.lesson))];
   }, [subject]);
 
   // ─── Init ───
@@ -268,6 +293,9 @@ export function SubjectPage() {
         saveDeckSession(subjectId, { shuffledOrder: shuffled, currentIndex: 0 });
       }
       setSelectedCategory(null);
+      setNotesQuery("");
+      setNotesLesson(null);
+      setDeckQuery("");
       setSessionLoaded(true);
     }
   }, [subjectId]);
@@ -293,6 +321,16 @@ export function SubjectPage() {
     saveDeckStats(subjectId!, newStats);
   };
 
+  // ─── Move within the filtered deck (manual navigation) ───
+  const handleFilteredIndexChange = (index: number) => {
+    if (filteredCards.length === 0) return;
+    const clamped = Math.max(0, Math.min(index, filteredCards.length - 1));
+    setFilteredIndex(clamped);
+    if (subjectId) {
+      saveDeckSession(subjectId, { shuffledOrder, currentIndex: clamped });
+    }
+  };
+
   // ─── Advance (called after answer, in both normal and zen) ───
   const handleAdvance = () => {
     const next = filteredIndex + 1;
@@ -309,12 +347,19 @@ export function SubjectPage() {
     setShuffledOrder(shuffled);
     setFilteredIndex(0);
     setSelectedCategory(null);
+    setDeckQuery("");
     saveDeckSession(subjectId, { shuffledOrder: shuffled, currentIndex: 0 });
   };
 
   // ─── Category change ───
   const handleCategoryChange = (category: string | null) => {
     setSelectedCategory(category);
+    setFilteredIndex(0);
+  };
+
+  // ─── Deck search change ───
+  const handleDeckQueryChange = (query: string) => {
+    setDeckQuery(query);
     setFilteredIndex(0);
   };
 
@@ -325,6 +370,7 @@ export function SubjectPage() {
     setShuffledOrder(shuffled);
     setFilteredIndex(0);
     setSelectedCategory(null);
+    setDeckQuery("");
     setDeckStats({ correct: 0, wrong: 0 });
     saveDeckSession(subjectId, { shuffledOrder: shuffled, currentIndex: 0 });
     saveDeckStats(subjectId, { correct: 0, wrong: 0 });
@@ -358,10 +404,7 @@ export function SubjectPage() {
         currentCard={currentCard}
         filteredTotal={filteredCards.length}
         filteredIndex={filteredIndex}
-        onFilteredIndexChange={(i) => {
-          setFilteredIndex(i);
-          if (subjectId) saveDeckSession(subjectId, { shuffledOrder, currentIndex: i });
-        }}
+        onFilteredIndexChange={handleFilteredIndexChange}
         onTimeUpdate={handleTimeUpdate}
         onExit={() => setZenMode(false)}
         onAnswer={(correct) => {
@@ -376,6 +419,15 @@ export function SubjectPage() {
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryChange}
         onShuffle={handleShuffle}
+        lessons={lessons}
+        notesQuery={notesQuery}
+        onNotesQueryChange={setNotesQuery}
+        notesLesson={notesLesson}
+        onNotesLessonChange={setNotesLesson}
+        deckQuery={deckQuery}
+        onDeckQueryChange={handleDeckQueryChange}
+        deckTerms={deckTerms}
+        hasCards={shuffledOrder.length > 0}
       />
     );
   }
@@ -402,10 +454,15 @@ export function SubjectPage() {
           <TabsTrigger value="decks">Anki Deck</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="notes" className="space-y-6 mt-6">
-          {subject.notes.map((note) => (
-            <NoteCard key={note.id} note={note} />
-          ))}
+        <TabsContent value="notes" className="mt-6">
+          <NotesPanel
+            notes={subject.notes}
+            lessons={lessons}
+            query={notesQuery}
+            onQueryChange={setNotesQuery}
+            selectedLesson={notesLesson}
+            onLessonChange={setNotesLesson}
+          />
         </TabsContent>
 
         <TabsContent value="decks" className="mt-6">
@@ -436,55 +493,47 @@ export function SubjectPage() {
                     </span>
                   </div>
                   <Progress value={correctPercentage} />
-                  <div className="text-center text-sm text-muted-foreground">
-                    Card {filteredIndex + 1} of {filteredCards.length}
-                  </div>
                 </div>
 
-                {currentCard && (
+                <div className="max-w-2xl mx-auto">
+                  <SubjectToolbar
+                    query={deckQuery}
+                    onQueryChange={handleDeckQueryChange}
+                    lessons={categories}
+                    selectedLesson={selectedCategory}
+                    onLessonChange={handleCategoryChange}
+                    status={
+                      filteredCards.length > 0
+                        ? `Card ${filteredIndex + 1} of ${filteredCards.length}`
+                        : "No cards"
+                    }
+                    onPrevious={() => handleFilteredIndexChange(filteredIndex - 1)}
+                    onNext={() => handleFilteredIndexChange(filteredIndex + 1)}
+                    previousLabel="Previous card"
+                    nextLabel="Next card"
+                    canNavigate={filteredCards.length > 0}
+                    onShuffle={handleShuffle}
+                  />
+                </div>
+
+                {currentCard ? (
                   <DeckCard
                     key={`${currentCard.id}-${filteredIndex}`}
                     card={currentCard}
+                    searchTerms={deckTerms}
                     onAnswer={(correct) => {
                       handleAnswer(correct);
                       handleAdvance();
                     }}
                   />
+                ) : (
+                  <p className="py-10 text-center text-sm text-muted-foreground">
+                    {shuffledOrder.length > 0
+                      ? "No cards match the current filters."
+                      : "This subject has no deck cards yet."}
+                  </p>
                 )}
               </>
-            )}
-
-            {!isDeckComplete && shuffledOrder.length > 0 && (
-              <div className="flex items-center justify-center gap-3 pt-2 pb-8">
-                <Button
-                  onClick={handleShuffle}
-                  variant="outline"
-                  size="sm"
-                  className="gap-1.5"
-                >
-                  <Shuffle className="size-4" />
-                  Shuffle
-                </Button>
-
-                <div className="w-px h-6 bg-border" />
-
-                <Select
-                  value={selectedCategory ?? "all"}
-                  onValueChange={(v) => handleCategoryChange(v === "all" ? null : v)}
-                >
-                  <SelectTrigger className="w-44" size="sm">
-                    <SelectValue placeholder="Category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All</SelectItem>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             )}
           </div>
         </TabsContent>

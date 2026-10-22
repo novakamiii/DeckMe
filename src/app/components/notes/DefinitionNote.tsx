@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
+import { withoutNodeProp } from "./markdown";
 
 interface DefinitionNoteProps {
   content: string;
@@ -40,9 +41,11 @@ const defComponents: Components = {
   ),
 };
 
+const safeDefComponents = withoutNodeProp(defComponents);
+
 export function DefinitionNote({ content }: DefinitionNoteProps) {
   return (
-    <ReactMarkdown remarkPlugins={[remarkGfm]} components={defComponents}>
+    <ReactMarkdown remarkPlugins={[remarkGfm]} components={safeDefComponents}>
       {content}
     </ReactMarkdown>
   );

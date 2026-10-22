@@ -1,19 +1,33 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnkiCard } from "../lib/mockData";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { highlightTerms } from "../lib/highlight";
+import { Card, CardContent, CardHeader } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { MarkdownNote } from "./notes/MarkdownNote";
 
+const NO_TERMS: string[] = [];
+
 interface DeckCardProps {
   card: AnkiCard;
   onAnswer: (correct: boolean) => void;
+  /** Search terms whose hits are highlighted inside the question and answer. */
+  searchTerms?: string[];
 }
 
-export function DeckCard({ card, onAnswer }: DeckCardProps) {
+export function DeckCard({ card, onAnswer, searchTerms = NO_TERMS }: DeckCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [answered, setAnswered] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Highlight the search hits in whichever side is showing.
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container) return;
+    const result = highlightTerms(container, searchTerms);
+    return result.cleanup;
+  }, [searchTerms, isFlipped, card.id]);
 
   const handleAnswer = (correct: boolean) => {
     setAnswered(true);
@@ -34,13 +48,16 @@ export function DeckCard({ card, onAnswer }: DeckCardProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         <div
+          ref={contentRef}
           className="min-h-48 flex items-center justify-center cursor-pointer p-8 bg-muted/30 rounded-lg transition-all hover:bg-muted/50"
           onClick={() => !answered && setIsFlipped(!isFlipped)}
         >
           {!isFlipped ? (
             <div className="text-center">
               <div className="text-sm text-muted-foreground mb-2">Question</div>
-              <CardTitle className="text-xl">{card.front}</CardTitle>
+              <div className="mx-auto max-w-2xl text-xl font-medium">
+                <MarkdownNote content={card.front} />
+              </div>
               <div className="text-sm text-muted-foreground mt-4">Click to reveal answer</div>
             </div>
           ) : (
