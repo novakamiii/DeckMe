@@ -60,6 +60,8 @@ sudo pacman -U deckme-1.0.9-1-x86_64.pkg.tar.zst
 
 (Replace the version number for other releases, or use `deckme-*.pkg.tar.zst`.)
 
+> **Note:** This app is not yet available on the AUR, as account registration is currently closed. A proper AUR package will be published in the near future.
+
 ---
 
 ## 📸 Snapshots
