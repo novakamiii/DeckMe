@@ -16,6 +16,16 @@ DeckMe is an AnkiDeck inspired Application for both Desktop and Mobile Devices. 
 
 </div>
 
+<div align="center">
+
+<a href="https://deck-me.vercel.app/" style="display:inline-block;padding:12px 28px;background:linear-gradient(135deg,#344E41 0%,#588157 100%);color:#DAD7CD;text-decoration:none;border-radius:999px;font-weight:700;font-size:16px;letter-spacing:.3px;box-shadow:0 6px 18px rgba(52,78,65,.35);border:1px solid rgba(218,215,205,.25);">
+  🌐 &nbsp; Try DeckMe on the Web &nbsp;→
+</a>
+
+<p style="margin:10px 0 0;font-size:13px;color:#6b7280;">No install required · runs right in your browser</p>
+
+</div>
+
 ---
 
 ## ✨ Features
