@@ -1,6 +1,6 @@
 [package]
 name = "deckme"
-version = "1.0.7"
+version = "1.0.9"
 description = "AnkiDeck inspired study application for notes and flashcard decks"
 authors = ["novakamiii <pauloneil3334@gmail.com>"]
 license = "Apache-2.0"

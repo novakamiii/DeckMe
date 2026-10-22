@@ -29,6 +29,26 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: Set version from tag
+        run: |
+          node -e "
+            const fs = require('fs');
+            const tag = (process.env.GITHUB_REF_NAME || '').replace(/^v/, '');
+            if (!tag) throw new Error('No tag found');
+            const confPath = 'src-tauri/tauri.conf.json';
+            const conf = JSON.parse(fs.readFileSync(confPath, 'utf8'));
+            conf.version = tag;
+            fs.writeFileSync(confPath, JSON.stringify(conf, null, 2) + '\n');
+            const pkgPath = 'package.json';
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+            pkg.version = tag;
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+            const cargoPath = 'src-tauri/Cargo.toml';
+            let cargo = fs.readFileSync(cargoPath, 'utf8');
+            cargo = cargo.replace(/^version = \".*\"/m, 'version = \"' + tag + '\"');
+            fs.writeFileSync(cargoPath, cargo);
+            console.log('Set version to', tag);
+          "
       - name: Install Frontend Dependencies
         run: npm install
       - name: Build Desktop Apps
@@ -39,6 +59,66 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: "DeckMe v__VERSION__"
           releaseDraft: true
+      - name: Upload .deb artifact
+        if: matrix.platform == 'ubuntu-22.04'
+        uses: actions/upload-artifact@v4
+        with:
+          name: deckme-deb
+          path: src-tauri/target/release/bundle/deb/*.deb
+
+  # --- ARCH LINUX PACKAGE (repackaged from .deb) ---
+  build-arch:
+    needs: build-desktop
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    permissions:
+      contents: write
+    steps:
+      - name: Install tooling
+        run: pacman -Syu --noconfirm base-devel
+      - name: Download .deb artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: deckme-deb
+          path: .
+      - name: Prepare build
+        run: |
+          set -e
+          mv *.deb app.deb
+          PKGVER="${GITHUB_REF_NAME#v}"
+          PKGVER="${PKGVER//-/_}"
+          echo "PKGVER=$PKGVER" >> "$GITHUB_ENV"
+          cat > PKGBUILD <<EOF
+          pkgname=deckme
+          pkgver=$PKGVER
+          pkgrel=1
+          pkgdesc="AnkiDeck inspired study application for notes and flashcard decks"
+          arch=('x86_64')
+          url="https://github.com/novakamiii/DeckMe"
+          license=('Apache-2.0')
+          depends=('gtk3' 'webkit2gtk-4.1')
+          options=('!strip' '!debug')
+          source=('app.deb')
+          noextract=('app.deb')
+          sha256sums=('SKIP')
+
+          package() {
+            bsdtar -xf "\${srcdir}/app.deb" -C "\${srcdir}"
+            bsdtar -xf "\${srcdir}"/data.tar.* -C "\${pkgdir}"
+          }
+          EOF
+      - name: Build package
+        run: |
+          set -e
+          id builder >/dev/null 2>&1 || useradd -m builder
+          chown -R builder:builder "$PWD"
+          su builder -c "cd '$PWD' && makepkg -f --nodeps --noconfirm"
+      - name: Upload Arch package to release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          draft: true
+          files: ./*.pkg.tar.zst
 
   # --- MOBILE BUILDS (Android) ---
   build-android:
@@ -74,6 +154,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          draft: true
           files: android/app/build/outputs/apk/debug/app-debug.apk
       - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4

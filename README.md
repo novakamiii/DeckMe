@@ -50,6 +50,18 @@ DeckMe is an AnkiDeck inspired Application for both Desktop and Mobile Devices. 
 
 ---
 
+### 🐧 Arch Linux
+
+Download the `.pkg.tar.zst` from the [Releases](https://github.com/novakamiii/DeckMe/releases) page, then install it with:
+
+```sh
+sudo pacman -U deckme-1.0.9-1-x86_64.pkg.tar.zst
+```
+
+(Replace the version number for other releases, or use `deckme-*.pkg.tar.zst`.)
+
+---
+
 ## 📸 Snapshots
 
 <div align="center">
