@@ -55,6 +55,18 @@ DeckMe is an AnkiDeck inspired Application for both Desktop and Mobile Devices. 
 
 </div>
 
+<div align="center">
+
+### 📥 Download
+
+| [![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/novakamiii/DeckMe/releases) | [![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://github.com/novakamiii/DeckMe/releases) |
+| :---: | :---: |
+| **Windows (.exe)** | **Linux (.AppImage/.deb)** |
+| [![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/novakamiii/DeckMe/releases) | [![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/novakamiii/DeckMe/releases) |
+| **macOS (.dmg)** | **Android (.apk)** |
+
+</div>
+
 ---
 
 ## 🚀 Getting Started
