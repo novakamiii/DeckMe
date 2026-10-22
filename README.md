@@ -94,10 +94,10 @@ sudo pacman -U deckme-1.0.9-1-x86_64.pkg.tar.zst
 
 ### **Mobile**
 
-| <img src="public/previews/1m.jpg" width="200" /> | <img src="public/previews/2m.jpg" width="200" /> |
+| <img src="public/previews/1m.png" width="200" /> | <img src="public/previews/2m.png" width="200" /> |
 | :---: | :---: |
 | **Smart Onboarding** | **Active Recall Deck** |
-| <img src="public/previews/3m.jpg" width="200" /> | <img src="public/previews/4m.jpg" width="200" /> |
+| <img src="public/previews/3m.png" width="200" /> | <img src="public/previews/4m.png" width="200" /> |
 | **Progress Tracking** | **Structured Notes** |
 
 </div>
