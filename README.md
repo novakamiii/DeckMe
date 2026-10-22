@@ -8,6 +8,18 @@
 
 DeckMe is an AnkiDeck inspired Application for both Desktop and Mobile Devices. Its main use is to help students and others alike to read quick notes and memorize information for upcoming tests and such.
 
+<p align="center">
+  <a href="https://deck-me.vercel.app/">
+    <img src="docs/assets/try-on-web.svg" alt="Try DeckMe in your browser" width="320">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://deck-me.vercel.app/">
+    <img src="public/previews/1.png" alt="DeckMe web app preview" width="600">
+  </a>
+</p>
+
 [![Release](https://img.shields.io/github/v/release/novakamiii/DeckMe?color=344E41&labelColor=DAD7CD&style=flat-square)](https://github.com/novakamiii/DeckMe/releases)
 [![License](https://img.shields.io/github/license/novakamiii/DeckMe?color=344E41&labelColor=DAD7CD&style=flat-square)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/novakamiii/DeckMe?color=344E41&labelColor=DAD7CD&style=flat-square)](https://github.com/novakamiii/DeckMe/stargazers)
@@ -15,12 +27,6 @@ DeckMe is an AnkiDeck inspired Application for both Desktop and Mobile Devices. 
 [English](README.md) · [Changelog](CHANGELOG.md) · [Report Bug](https://github.com/novakamiii/DeckMe/issues)
 
 </div>
-
-<p align="center">
-  <a href="https://deck-me.vercel.app/">
-    <img alt="Try DeckMe on the Web — no install required" src="https://img.shields.io/badge/%F0%9F%8C%90_Try_DeckMe_on_the_Web-No_install_required-344E41?style=for-the-badge&logo=googlechrome&logoColor=white">
-  </a>
-</p>
 
 ---
 
