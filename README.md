@@ -29,6 +29,27 @@ DeckMe is an AnkiDeck inspired Application for both Desktop and Mobile Devices. 
 
 ---
 
+### 📥 Download
+
+<div align="center">
+
+<a href="https://github.com/novakamiii/DeckMe/releases/latest">
+  <img src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" height="40" />
+</a>
+<a href="https://github.com/novakamiii/DeckMe/releases/latest">
+  <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux" height="40" />
+</a>
+<a href="https://github.com/novakamiii/DeckMe/releases/latest">
+  <img src="https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS" height="40" />
+</a>
+<a href="https://github.com/novakamiii/DeckMe/releases/latest">
+  <img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android" height="40" />
+</a>
+
+</div>
+
+---
+
 ## 📸 Snapshots
 
 <div align="center">
@@ -52,18 +73,6 @@ DeckMe is an AnkiDeck inspired Application for both Desktop and Mobile Devices. 
 | **Smart Onboarding** | **Active Recall Deck** |
 | <img src="public/previews/3m.jpg" width="200" /> | <img src="public/previews/4m.jpg" width="200" /> |
 | **Progress Tracking** | **Structured Notes** |
-
-</div>
-
-<div align="center">
-
-### 📥 Download
-
-| [![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/novakamiii/DeckMe/releases) | [![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://github.com/novakamiii/DeckMe/releases) |
-| :---: | :---: |
-| **Windows (.exe)** | **Linux (.AppImage/.deb)** |
-| [![macOS](https://img.shields.io/badge/macOS-000000?style=for-the-badge&logo=apple&logoColor=white)](https://github.com/novakamiii/DeckMe/releases) | [![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/novakamiii/DeckMe/releases) |
-| **macOS (.dmg)** | **Android (.apk)** |
 
 </div>
 
